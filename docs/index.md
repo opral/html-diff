@@ -2,8 +2,8 @@
 pageType: home
 
 hero:
-  name: HTML Diff
-  text: Build a diff view in your app
+  name: ""
+  text: Show a rich diff in your app
   tagline: Universal HTML diffing for any app UI - works with React, Vue, Svelte, Angular, and more
   actions:
     - theme: brand
