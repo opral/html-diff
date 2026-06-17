@@ -11,8 +11,17 @@ HTML diff uses data attributes to control how elements are diffed and displayed.
 The `data-diff-key` attribute provides a unique identifier that allows the diff algorithm to match elements between the "before" and "after" states.
 
 ```html
-<p data-diff-key="kx8m">Hello World</p>
+<p data-diff-key="block-introduction">Hello World</p>
 ```
+
+Keys should be stable and semantic: derive them from durable app data, persisted content IDs, or block identity. Avoid keys that are only based on render position, especially for ordered prose or markdown. If `paragraph-2` disappears, a position-based key can cause the old second paragraph to be matched with the new second paragraph even when they are different pieces of content.
+
+When you need to synthesize keys for content that does not already have IDs, prefer this order:
+
+1. Existing persisted IDs from your app or content model
+2. Stable content or block IDs generated when the content is created
+3. Matching unchanged siblings by text or signature
+4. Render position only as a last resort
 
 ### Example: Adding an element
 
@@ -181,7 +190,29 @@ Notice how the word-level diffing breaks the HTML structure by inserting `<span>
 
 **Optional attribute to show removed elements in the diff result.**
 
-By default, when elements are removed, they are not inserted into the diff result—only existing elements receive diff attributes. The `data-diff-show-when-removed` attribute tells the diff engine that this element should be displayed with strikethrough styling when removed.
+By default, removed elements are hidden: they are not inserted into the diff result, and only elements that still exist in the "after" HTML can receive diff attributes. Add `data-diff-show-when-removed` to the element in the "before" HTML when you want that removed element to be cloned into the result with `data-diff-status="removed"`.
+
+Minimal useful HTML for text content:
+
+```html
+<!-- Before -->
+<p
+  data-diff-key="block-introduction"
+  data-diff-mode="words"
+  data-diff-show-when-removed
+>
+  The quick brown fox
+</p>
+
+<!-- After -->
+<p
+  data-diff-key="block-introduction"
+  data-diff-mode="words"
+  data-diff-show-when-removed
+>
+  The fast red fox
+</p>
+```
 
 ### When to use data-diff-show-when-removed
 

@@ -140,18 +140,46 @@ Include the default styling if you want ready-made highlights:
 import "@lix-js/html-diff/default.css";
 ```
 
-### Step 1: Add `data-diff-key` attributes
-
-Add unique [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes to elements you want to track for changes. Use random, short identifiers (not semantic names):
+Minimal useful HTML for prose diffs:
 
 ```html
-<!-- ✅ Good: Random keys -->
-<div data-diff-key="k7m2">User content</div>
-<p data-diff-key="x9n4">Some text</p>
+<!-- Before -->
+<article>
+  <p
+    data-diff-key="intro-paragraph"
+    data-diff-mode="words"
+    data-diff-show-when-removed
+  >
+    The quick brown fox
+  </p>
+</article>
 
-<!-- ❌ Avoid: Semantic names -->
-<div data-diff-key="user-profile">...</div>
-<p data-diff-key="description">...</p>
+<!-- After -->
+<article>
+  <p
+    data-diff-key="intro-paragraph"
+    data-diff-mode="words"
+    data-diff-show-when-removed
+  >
+    The fast red fox
+  </p>
+</article>
+```
+
+Use `data-diff-key` to match the same element across renders, `data-diff-mode="words"` for inline word highlights, and `data-diff-show-when-removed` on elements that should stay visible when deleted.
+
+### Step 1: Add `data-diff-key` attributes
+
+Add unique [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes to elements you want to track for changes. Use stable semantic keys derived from durable app or content identity:
+
+```html
+<!-- Good: keys derived from durable app/content identity -->
+<div data-diff-key="user-42-profile">User content</div>
+<p data-diff-key="block-introduction">Some text</p>
+
+<!-- Avoid: keys derived only from render position -->
+<p data-diff-key="paragraph-1">First paragraph</p>
+<p data-diff-key="paragraph-2">Second paragraph</p>
 ```
 
 **Key guidelines:**
@@ -159,10 +187,11 @@ Add unique [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes to
 - Use the same key for the same element in before/after HTML
 - Only add keys to elements you want to diff (not every element)
 - Elements without keys remain unchanged in the diff
+- Avoid position-only fallback keys for ordered prose or markdown; when a paragraph is deleted, a position key can pair the deleted paragraph with the next paragraph
 
 #### Programmatic key generation
 
-In most apps you will programatically generate the keys based on your data:
+In most apps you will programmatically generate the keys based on your data:
 
 ```ts
 function UserCard({ user }) {
@@ -178,6 +207,13 @@ function UserCard({ user }) {
 const beforeHtml = renderToString(<UserCard user={oldUser} />);
 const afterHtml = renderToString(<UserCard user={newUser} />);
 ```
+
+If your source content does not already have IDs, prefer this fallback order when synthesizing keys:
+
+1. Existing persisted IDs from your app or content model
+2. Stable content or block IDs generated when the content is created
+3. Matching unchanged siblings by text or signature
+4. Render position only as a last resort
 
 ### Step 2: Generate the diff
 

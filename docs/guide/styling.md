@@ -57,15 +57,15 @@ Or, add it to your HTML:
 You can override these styles in your own CSS for custom themes or branding:
 
 ```css
-[data-diff-status="added"] {
+.my-diff-root [data-diff-status="added"] {
   color: #080;
   background: #efe;
 }
-[data-diff-status="modified"] {
+.my-diff-root [data-diff-status="modified"] {
   color: #f60;
   background: #ffc;
 }
-[data-diff-status="removed"] {
+.my-diff-root [data-diff-status="removed"] {
   color: #b00;
   background: #fee;
 }
@@ -86,32 +86,42 @@ Because diff metadata is attached via `data-diff-status`, your components keep t
 <div class="card featured" data-diff-status="modified">Content</div>
 ```
 
-You can now scope your override styles with attribute selectors without worrying about class ordering.
+You can now scope your override styles with attribute selectors and a wrapper around the rendered diff.
 
 ### CSS Specificity Tips
 
-Attribute selectors have the same specificity as classes, so you can rely on normal cascade rules:
+Attribute selectors have the same specificity as classes. Bare selectors like `[data-diff-status="added"]` can lose to app content styles such as `.content h2`, `.prose a`, `pre code`, or `.pricing-table td`, especially when those rules load later or have higher specificity.
+
+Prefer scoping diff styles under the element that contains the rendered diff:
 
 ```css
-/* Your existing styles work as normal */
-.card {
-  padding: 20px;
-  border: 1px solid #ccc;
+.my-diff-root [data-diff-status="added"] {
+  color: #080;
+  background: #efe;
 }
-.featured {
-  border-color: gold;
+.my-diff-root [data-diff-status="modified"] {
+  color: #f60;
+  background: #ffc;
 }
+.my-diff-root [data-diff-status="removed"] {
+  color: #b00;
+  background: #fee;
+  text-decoration: line-through;
+}
+```
 
-/* Diff styles override conflicting properties */
-[data-diff-status="modified"] {
-  color: orange;
-} /* This color wins */
-[data-diff-status="added"] {
-  color: green;
-} /* This color wins */
-[data-diff-status="removed"] {
-  color: red;
-} /* This color wins */
+If your app has stronger content selectors, match that context in your diff styles:
+
+```css
+.my-diff-root .content [data-diff-status="added"] {
+  color: #080;
+}
+.my-diff-root .content [data-diff-status="modified"] {
+  color: #f60;
+}
+.my-diff-root .content [data-diff-status="removed"] {
+  color: #b00;
+}
 ```
 
 This ensures your app's layout and design remain intact while only the diff highlighting is added on top.
